@@ -1,5 +1,6 @@
 ---
-title: "Main"
+title: "Are alcoholics smart?"
+author: "The most sober: Dariia Zadorozhna, Yuliia Martynova, Anastasia Kompaniiets"
 format: pdf
 editor: visual
 ---
@@ -8,6 +9,7 @@ editor: visual
 
 ```{r}
 #| warning: false
+#| echo: false
 library(tidyverse)
 library(tidymodels)
 
@@ -19,6 +21,7 @@ glimpse(students)
 Here we form 2 groups according to their level of alcohol assumption
 
 ```{r}
+#| echo: false
 group1 <- students %>% filter(Dalc < 3 & Walc < 3)   
 group2 <- students %>% filter(Dalc >= 3 | Walc >= 3)    
 
@@ -45,6 +48,7 @@ ggplot(data_summary, aes(x=age,y=mean_gpa,fill=alcohol_group))+
 ```
 
 ```{r}
+#| echo: false
 ggplot(students, aes(x=G3,fill=alcohol_group))+
   geom_density(alpha=0.5)+
   labs(title="GPA distribution by alcohol group",
@@ -69,6 +73,7 @@ statistics
 We see that
 
 ```{r}
+#| echo: false
 control_count <- statistics$count[1]
 test_count <- statistics$count[2]
 
@@ -80,6 +85,7 @@ cat("Count of less than 3 group:", control_count, "\nCount of more than 3 group:
 . . .
 
 ```{r}
+#| echo: false
 control_mean <- statistics$mean_delivery_time[1]
 test_mean <- statistics$mean_delivery_time[2]
 cat("Mean of less than 3 group:", control_mean, "\nMean of more than 3 group:", test_mean)
@@ -88,6 +94,7 @@ cat("Mean of less than 3 group:", control_mean, "\nMean of more than 3 group:", 
 . . .
 
 ```{r}
+#| echo: false
 control_sd <- statistics$sd_delivery_time[1]
 test_sd <- statistics$sd_delivery_time[2]
 cat("Standard deviation of less than 3 group:",control_sd, "\nStandard deviation of more than 3 group:",test_sd)
@@ -96,6 +103,7 @@ cat("Standard deviation of less than 3 group:",control_sd, "\nStandard deviation
 . . .
 
 ```{r}
+#| echo: false
 t.test(G3 ~ alcohol_group, data = students)
 ```
 
@@ -104,7 +112,7 @@ The p-value is much smaller than 0.05, which means that we can reject the null h
 We can also see that the confidence interval for the difference in means is (написати тут його). Since zero value is not within this interval, we can reject the null hypothesis.
 
 ```{r}
-
+#| echo: false
 get_stat_power <- function(N1,N2, mu_h0, mu_alternative,sd_h0, sd_alternative, alpha) {
   
   norm_h0 <- dnorm(0:N1, mean = mu_h0, sd = sd_h0)
