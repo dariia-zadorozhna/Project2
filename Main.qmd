@@ -1,0 +1,124 @@
+---
+title: "Main"
+format: pdf
+editor: visual
+---
+
+## Project 2
+
+```{r}
+#| warning: false
+library(tidyverse)
+library(tidymodels)
+
+students <- read_delim("students.csv", delim = ";")
+
+glimpse(students)
+```
+
+Here we form 2 groups according to their level of alcohol assumption
+
+```{r}
+group1 <- students %>% filter(Dalc < 3 & Walc < 3)   
+group2 <- students %>% filter(Dalc >= 3 | Walc >= 3)    
+
+cat("Number of students with less than rate 3 of alcohol consumption:", nrow(group1), "\n")
+cat("Number of students with greater than rate 3 of alcohol consumption:", nrow(group2), "\n")
+
+students <- students %>%
+  mutate(alcohol_group = ifelse(Dalc < 3 & Walc < 3, "less3", "more3"))
+```
+
+```{r}
+#| echo: false
+data_summary <- students %>% group_by(age, alcohol_group) %>%
+  summarize(mean_gpa = mean(G3), .groups = "drop")
+
+ggplot(data_summary, aes(x=age,y=mean_gpa,fill=alcohol_group))+
+  geom_bar(stat="identity",position="dodge")+
+  labs(title="Average GPA by age and alcohol group",
+       x="Age",
+       y="Average GPA",
+       fill="Alcohol group")+
+   scale_x_continuous(breaks = seq(min(data_summary$age), max(data_summary$age), by = 1)) +
+  theme_minimal()
+```
+
+```{r}
+ggplot(students, aes(x=G3,fill=alcohol_group))+
+  geom_density(alpha=0.5)+
+  labs(title="GPA distribution by alcohol group",
+       x="GPA",
+       y="Density",
+       fill="Alcohol group")+
+  theme_minimal()
+
+statistics <- students %>%
+  group_by(alcohol_group) %>%
+  summarize(
+    mean_delivery_time = mean(G3),
+    median_delivery_time = median(G3),
+    sd_delivery_time = sd(G3),
+    min_delivery_time = min(G3),
+    max_delivery_time = max(G3),
+    count = n()
+  )
+statistics
+```
+
+We see that
+
+```{r}
+control_count <- statistics$count[1]
+test_count <- statistics$count[2]
+
+count_difference <- abs(control_count-test_count)
+
+cat("Count of less than 3 group:", control_count, "\nCount of more than 3 group:", test_count, "\nDifference of counts:", count_difference)
+```
+
+. . .
+
+```{r}
+control_mean <- statistics$mean_delivery_time[1]
+test_mean <- statistics$mean_delivery_time[2]
+cat("Mean of less than 3 group:", control_mean, "\nMean of more than 3 group:", test_mean)
+```
+
+. . .
+
+```{r}
+control_sd <- statistics$sd_delivery_time[1]
+test_sd <- statistics$sd_delivery_time[2]
+cat("Standard deviation of less than 3 group:",control_sd, "\nStandard deviation of more than 3 group:",test_sd)
+```
+
+. . .
+
+```{r}
+t.test(G3 ~ alcohol_group, data = students)
+```
+
+The p-value is much smaller than 0.05, which means that we can reject the null hypothesis. The conclusion is that the GPA for the groups is different. In our assumption it means that the GPA of those who consume more alcohol is less than of those who consume less alcohol.
+
+We can also see that the confidence interval for the difference in means is (написати тут його). Since zero value is not within this interval, we can reject the null hypothesis.
+
+```{r}
+
+get_stat_power <- function(N1,N2, mu_h0, mu_alternative,sd_h0, sd_alternative, alpha) {
+  
+  norm_h0 <- dnorm(0:N1, mean = mu_h0, sd = sd_h0)
+  norm_alternative <- dnorm(0:N2, mean = mu_alternative, sd = sd_alternative)
+  
+  critical_value <- qnorm(1 - alpha, mean = mu_h0, sd = sd_h0) + 1
+
+  power <- 1 - pnorm(critical_value - 1, mean = mu_h0, sd = sd_alternative)
+  
+  return(power)
+}
+
+stat_power <- get_stat_power(control_count, test_count, control_mean, test_mean, control_sd, test_sd, 0.05)
+cat("Statistical power:",stat_power)
+```
+
+The statistical power is really small, which means that we can easily fail to reject the null hypothesis even if the alternative hypothesis is true (meaning there is a real difference in GPA between the less3 and more3 groups).
