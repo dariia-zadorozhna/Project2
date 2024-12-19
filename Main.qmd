@@ -44,17 +44,19 @@ ggplot(data_summary, aes(x=age,y=mean_gpa,fill=alcohol_group))+
        y="Average GPA",
        fill="Alcohol group")+
    scale_x_continuous(breaks = seq(min(data_summary$age), max(data_summary$age), by = 1)) +
+  scale_fill_manual(values = c("less3" = "#FF5733", "more3" = "#33CFFF"))+
   theme_minimal()
 ```
 
 ```{r}
 #| echo: false
 ggplot(students, aes(x=G3,fill=alcohol_group))+
-  geom_density(alpha=0.5)+
+  geom_density(alpha=0.8)+
   labs(title="GPA distribution by alcohol group",
        x="GPA",
        y="Density",
        fill="Alcohol group")+
+  scale_fill_manual(values = c("less3" = "#FF5733", "more3" = "#33CFFF")) +
   theme_minimal()
 
 statistics <- students %>%
